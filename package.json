@@ -1,7 +1,7 @@
 {
-  "name": "chart-miniapp",
+  "name": "parallax-gallery-miniapp",
   "version": "1.0.0",
-  "description": "Interactive animated charts with Victory",
+  "description": "Beautiful parallax scroll gallery with smooth animations",
   "keywords": [
     "ern-miniapp"
   ],
@@ -11,9 +11,6 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.77.3",
-    "react-native-svg": "^15.14.0",
-    "victory-native": "^41.20.1",
-    "@shopify/react-native-skia": "^1.7.2",
-    "react-native-reanimated": "^3.10.1"
+    "react-native-linear-gradient": "^2.8.3"
   }
 }
