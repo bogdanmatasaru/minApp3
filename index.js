@@ -1,157 +1,231 @@
-import React, {useState} from 'react';
-import {AppRegistry, View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
-import {VictoryChart, VictoryLine, VictoryBar, VictoryArea, VictoryTheme, VictoryAxis} from 'victory-native';
+import React, {useRef} from 'react';
+import {
+  AppRegistry,
+  View,
+  Text,
+  ScrollView,
+  Animated,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
-const {width} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
+const CARD_HEIGHT = height * 0.7;
 
-const InteractiveChartApp = () => {
-  const [chartType, setChartType] = useState('line');
+const parallaxData = [
+  {
+    title: '🌄 Mountain Vista',
+    subtitle: 'Explore the peaks',
+    colors: ['#FF6B6B', '#FF8E53', '#FFA726'],
+  },
+  {
+    title: '🌊 Ocean Depths',
+    subtitle: 'Dive into the blue',
+    colors: ['#4FACFE', '#00F2FE', '#43E97B'],
+  },
+  {
+    title: '🌆 City Lights',
+    subtitle: 'Urban nightscape',
+    colors: ['#667EEA', '#764BA2', '#F093FB'],
+  },
+  {
+    title: '🌸 Cherry Blossom',
+    subtitle: 'Spring awakening',
+    colors: ['#FA709A', '#FEE140', '#FFB88C'],
+  },
+  {
+    title: '🌌 Galaxy Dreams',
+    subtitle: 'Stars and beyond',
+    colors: ['#1A2980', '#26D0CE', '#667EEA'],
+  },
+];
 
-  const data = [
-    {x: 'Jan', y: 30}, {x: 'Feb', y: 45}, {x: 'Mar', y: 35}, 
-    {x: 'Apr', y: 55}, {x: 'May', y: 50}, {x: 'Jun', y: 70}
-  ];
-
-  const salesData = [
-    {x: 1, y: 2000}, {x: 2, y: 3000}, {x: 3, y: 2500}, 
-    {x: 4, y: 4000}, {x: 5, y: 3500}, {x: 6, y: 5000}
-  ];
+const ParallaxGalleryApp = () => {
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   return (
     <View style={styles.container}>
+      {/* Fixed Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>📊 Analytics Dashboard</Text>
-        <Text style={styles.headerSubtitle}>Interactive Charts with Victory</Text>
+        <Text style={styles.headerTitle}>Parallax Gallery</Text>
+        <Text style={styles.headerSubtitle}>Smooth scroll experience</Text>
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {/* Chart Type Selector */}
-        <View style={styles.chartTypeContainer}>
-          <ChartTypeButton 
-            icon="📈" 
-            label="Line" 
-            active={chartType === 'line'} 
-            onPress={() => setChartType('line')} 
-          />
-          <ChartTypeButton 
-            icon="📊" 
-            label="Bar" 
-            active={chartType === 'bar'} 
-            onPress={() => setChartType('bar')} 
-          />
-          <ChartTypeButton 
-            icon="🌊" 
-            label="Area" 
-            active={chartType === 'area'} 
-            onPress={() => setChartType('area')} 
-          />
-        </View>
+      <Animated.ScrollView
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: true}
+        )}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}>
+        {parallaxData.map((item, index) => {
+          const inputRange = [
+            (index - 1) * CARD_HEIGHT,
+            index * CARD_HEIGHT,
+            (index + 1) * CARD_HEIGHT,
+          ];
 
-        {/* Main Chart */}
-        <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Monthly Revenue</Text>
-          <VictoryChart theme={VictoryTheme.material} width={width - 40} height={250}>
-            <VictoryAxis style={{tickLabels: {fontSize: 12, fill: '#666'}}} />
-            <VictoryAxis dependentAxis style={{tickLabels: {fontSize: 12, fill: '#666'}}} />
-            
-            {chartType === 'line' && (
-              <VictoryLine 
-                data={data} 
-                style={{data: {stroke: '#4A90E2', strokeWidth: 3}}}
-                animate={{duration: 500}}
-              />
-            )}
-            
-            {chartType === 'bar' && (
-              <VictoryBar 
-                data={data} 
-                style={{data: {fill: '#50C878'}}}
-                animate={{duration: 500}}
-              />
-            )}
-            
-            {chartType === 'area' && (
-              <VictoryArea 
-                data={data} 
-                style={{data: {fill: 'rgba(255, 107, 157, 0.6)', stroke: '#FF6B9D', strokeWidth: 2}}}
-                animate={{duration: 500}}
-              />
-            )}
-          </VictoryChart>
-        </View>
+          const scale = scrollY.interpolate({
+            inputRange,
+            outputRange: [0.8, 1, 0.8],
+            extrapolate: 'clamp',
+          });
 
-        {/* Sales Chart */}
-        <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Sales Growth</Text>
-          <VictoryChart theme={VictoryTheme.material} width={width - 40} height={200}>
-            <VictoryBar 
-              data={salesData} 
-              style={{data: {fill: ({datum}) => datum.y > 3000 ? '#4A90E2' : '#9B59B6'}}}
-              animate={{duration: 1000}}
-              cornerRadius={5}
-            />
-          </VictoryChart>
-        </View>
+          const opacity = scrollY.interpolate({
+            inputRange,
+            outputRange: [0.5, 1, 0.5],
+            extrapolate: 'clamp',
+          });
 
-        {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          <StatCard icon="💰" title="Revenue" value="$45.2K" change="+12.5%" positive />
-          <StatCard icon="👥" title="Users" value="1,234" change="+8.2%" positive />
-          <StatCard icon="📦" title="Orders" value="567" change="-3.1%" positive={false} />
-          <StatCard icon="⭐" title="Rating" value="4.8" change="+0.3" positive />
-        </View>
-      </ScrollView>
+          const translateY = scrollY.interpolate({
+            inputRange,
+            outputRange: [CARD_HEIGHT * 0.3, 0, -CARD_HEIGHT * 0.3],
+            extrapolate: 'clamp',
+          });
+
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.cardContainer,
+                {
+                  transform: [{scale}, {translateY}],
+                  opacity,
+                },
+              ]}>
+              <LinearGradient
+                colors={item.colors}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+                style={styles.cardGradient}>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+                  
+                  {/* Decorative circles */}
+                  <View style={styles.decorativeCircles}>
+                    <View style={[styles.circle, styles.circle1]} />
+                    <View style={[styles.circle, styles.circle2]} />
+                    <View style={[styles.circle, styles.circle3]} />
+                  </View>
+
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.cardNumber}>0{index + 1}</Text>
+                    <Text style={styles.cardTotal}>/ 0{parallaxData.length}</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </Animated.View>
+          );
+        })}
+      </Animated.ScrollView>
     </View>
   );
 };
 
-const ChartTypeButton = ({icon, label, active, onPress}) => (
-  <TouchableOpacity 
-    style={[styles.chartTypeBtn, active && styles.chartTypeBtnActive]} 
-    onPress={onPress}
-    activeOpacity={0.7}>
-    <Text style={styles.chartTypeIcon}>{icon}</Text>
-    <Text style={[styles.chartTypeLabel, active && styles.chartTypeLabelActive]}>{label}</Text>
-  </TouchableOpacity>
-);
-
-const StatCard = ({icon, title, value, change, positive}) => (
-  <View style={styles.statCard}>
-    <Text style={styles.statIcon}>{icon}</Text>
-    <Text style={styles.statTitle}>{title}</Text>
-    <Text style={styles.statValue}>{value}</Text>
-    <Text style={[styles.statChange, positive ? styles.statPositive : styles.statNegative]}>
-      {change}
-    </Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#f5f7fa'},
-  header: {backgroundColor: '#4A90E2', paddingTop: 60, paddingHorizontal: 20, paddingBottom: 30},
-  headerTitle: {fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 5},
-  headerSubtitle: {fontSize: 14, color: 'rgba(255,255,255,0.9)'},
-  scrollView: {flex: 1},
-  chartTypeContainer: {flexDirection: 'row', padding: 15, gap: 10},
-  chartTypeBtn: {flex: 1, backgroundColor: '#fff', padding: 15, borderRadius: 12, alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3},
-  chartTypeBtnActive: {backgroundColor: '#4A90E2'},
-  chartTypeIcon: {fontSize: 24, marginBottom: 5},
-  chartTypeLabel: {fontSize: 12, fontWeight: '600', color: '#666'},
-  chartTypeLabelActive: {color: '#fff'},
-  chartCard: {backgroundColor: '#fff', margin: 15, marginTop: 5, padding: 20, borderRadius: 15, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5},
-  chartTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#333'},
-  statsGrid: {flexDirection: 'row', flexWrap: 'wrap', padding: 10},
-  statCard: {width: '48%', backgroundColor: '#fff', margin: '1%', padding: 20, borderRadius: 15, alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3},
-  statIcon: {fontSize: 32, marginBottom: 10},
-  statTitle: {fontSize: 12, color: '#999', marginBottom: 5},
-  statValue: {fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 5},
-  statChange: {fontSize: 14, fontWeight: '600'},
-  statPositive: {color: '#50C878'},
-  statNegative: {color: '#FF6B6B'},
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0E27',
+  },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#0A0E27',
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingVertical: 20,
+  },
+  cardContainer: {
+    height: CARD_HEIGHT,
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  cardGradient: {
+    flex: 1,
+    borderRadius: 25,
+  },
+  cardContent: {
+    flex: 1,
+    padding: 30,
+    justifyContent: 'space-between',
+  },
+  cardTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  cardSubtitle: {
+    fontSize: 20,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '500',
+  },
+  decorativeCircles: {
+    position: 'absolute',
+    top: '40%',
+    right: 20,
+  },
+  circle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 15,
+  },
+  circle1: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  circle2: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginLeft: 40,
+  },
+  circle3: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginLeft: 20,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  cardNumber: {
+    fontSize: 72,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  cardTotal: {
+    fontSize: 24,
+    color: 'rgba(255,255,255,0.7)',
+    marginLeft: 10,
+  },
 });
 
-AppRegistry.registerComponent('InteractiveChartApp', () => InteractiveChartApp);
-export default InteractiveChartApp;
+AppRegistry.registerComponent('ParallaxGalleryApp', () => ParallaxGalleryApp);
+export default ParallaxGalleryApp;
 
 
 
