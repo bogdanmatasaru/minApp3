@@ -153,3 +153,5 @@ const styles = StyleSheet.create({
 AppRegistry.registerComponent('InteractiveChartApp', () => InteractiveChartApp);
 export default InteractiveChartApp;
 
+
+

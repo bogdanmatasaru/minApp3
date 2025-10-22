@@ -2,14 +2,16 @@
   "name": "chart-miniapp",
   "version": "1.0.0",
   "description": "Interactive animated charts with Victory",
-  "keywords": ["ern-miniapp"],
+  "keywords": [
+    "ern-miniapp"
+  ],
   "ern": {
     "version": "^0.53.0"
   },
   "dependencies": {
-    "react": "18.2.0",
-    "react-native": "0.72.17",
-    "react-native-svg": "^14.0.0",
-    "victory-native": "^36.9.2"
+    "react": "^19.2.0",
+    "react-native": "^0.82.1",
+    "react-native-svg": "^15.14.0",
+    "victory-native": "^41.20.1"
   }
 }
